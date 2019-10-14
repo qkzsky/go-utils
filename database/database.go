@@ -1,8 +1,8 @@
 package database
 
 import (
-	"apollo_cron/utils/conf"
-	"apollo_cron/utils/logger"
+	"go-utils/conf"
+	"go-utils/logger"
 	"database/sql/driver"
 	"fmt"
 	"github.com/jinzhu/gorm"

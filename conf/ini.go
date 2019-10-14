@@ -1,7 +1,7 @@
 package conf
 
 import (
-	"apollo_cron/utils"
+	"go-utils"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/ini.v1"
 	"os"

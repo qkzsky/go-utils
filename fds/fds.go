@@ -1,7 +1,7 @@
 package fds
 
 import (
-	"apollo_cron/utils/conf"
+	"go-utils/conf"
 	"fmt"
 	"github.com/XiaoMi/galaxy-fds-sdk-golang"
 	"github.com/XiaoMi/galaxy-fds-sdk-golang/Model"

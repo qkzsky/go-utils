@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"apollo_cron/utils/conf"
+	"go-utils/conf"
 	"gopkg.in/ini.v1"
 	"sync"
 	"time"

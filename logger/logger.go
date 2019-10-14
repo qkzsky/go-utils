@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"apollo_cron/utils/conf"
+	"go-utils/conf"
 	"flag"
 	"fmt"
 	"github.com/gin-gonic/gin"
