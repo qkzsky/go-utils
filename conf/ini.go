@@ -1,17 +1,21 @@
 package conf
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/qkzsky/go-utils"
 	"gopkg.in/ini.v1"
+	"log"
 	"os"
 	"path/filepath"
 )
 
+const AppConfFile = "app.ini"
+
 var (
-	AppPath         string
-	AppConf         *ini.File
-	defaultConfFile = "scm_config.ini"
+	AppPath string
+
+	AppConf *ini.File
 )
 
 func init() {
@@ -20,7 +24,7 @@ func init() {
 		panic(err)
 	}
 
-	AppConf = NewConfig(defaultConfFile)
+	AppConf = NewConfig(AppConfFile)
 	gin.SetMode(AppConf.Section("").Key("mode").String())
 }
 
@@ -35,6 +39,10 @@ func NewConfig(filename string) *ini.File {
 
 		confPath = filepath.Join(tempPath, "conf", filename)
 		for !utils.FileExists(confPath) {
+			if tempPath == "" {
+				log.Println(fmt.Sprintf("config file %s not existed!", filename))
+				return nil
+			}
 			tempPath = utils.ParentDirectory(tempPath)
 			confPath = filepath.Join(tempPath, "conf", filename)
 		}

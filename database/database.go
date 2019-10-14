@@ -10,7 +10,6 @@ import (
 	"github.com/qkzsky/go-utils/logger"
 	"go.uber.org/zap"
 	"gopkg.in/ini.v1"
-	"micode.be.xiaomi.com/systech/asset/xmcrypt"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -24,8 +23,6 @@ const DefaultCharset = "utf8"
 const DefaultSSLMode = "disable"
 const DefaultMysqlMaxIdle = 10
 const DefaultMysqlMaxOpen = 20
-
-const CryptKey = "jBhXz9AsRcpKTnMdVgHr2tE5G86JuOlb"
 
 var (
 	dbConf *ini.Section
@@ -54,11 +51,8 @@ func NewDB(databaseName string) *gorm.DB {
 	port := dbConf.Key(databaseName + ".port").String()
 	username := dbConf.Key(databaseName + ".username").String()
 	password := dbConf.Key(databaseName + ".password").String()
-	if passwordDec, err := xmcrypt.DecryptExtend(password, CryptKey); err == nil {
-		password = passwordDec
-	}
 	dbName := dbConf.Key(databaseName + ".db").String()
-	sslMode := dbConf.Key(databaseName + ".disable").MustString(DefaultSSLMode)
+	sslMode := dbConf.Key(databaseName + ".sslmode").MustString(DefaultSSLMode)
 	charset := dbConf.Key(databaseName + ".charset").MustString(DefaultCharset)
 	maxOpen := dbConf.Key(databaseName + ".max_open").MustInt(DefaultMysqlMaxOpen)
 	maxIdle := dbConf.Key(databaseName + ".max_idle").MustInt(DefaultMysqlMaxIdle)
@@ -66,9 +60,9 @@ func NewDB(databaseName string) *gorm.DB {
 	var dsn string
 	switch drive {
 	case "mysql":
-		dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=false&loc=Local&timeout=15s",
+		dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=true&loc=Local&timeout=15s",
 			username, password, host, port, dbName, charset)
-	case "postgres":
+	case "postgresql":
 		dsn = fmt.Sprintf("host=%s:%s user=%s password=%s dbname=%s sslmode=%s",
 			host, port, username, password, dbName, sslMode)
 	default:
@@ -184,7 +178,7 @@ func (logger gLogger) Print(values ...interface{}) {
 			formattedValuesLength := len(formattedValues)
 			for index, value := range regexp.MustCompile(`\?`).Split(values[3].(string), -1) {
 				sql += value
-				if index < formattedValuesLength {
+				if index < formattedValuesLength && formattedValues != nil {
 					sql += formattedValues[index]
 				}
 			}
