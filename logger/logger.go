@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"go-utils/conf"
+	"github.com/qkzsky/go-utils/conf"
 	"flag"
 	"fmt"
 	"github.com/gin-gonic/gin"

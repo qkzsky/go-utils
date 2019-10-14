@@ -1,8 +1,8 @@
 package database
 
 import (
-	"go-utils/conf"
-	"go-utils/logger"
+	"github.com/qkzsky/go-utils/conf"
+	"github.com/qkzsky/go-utils/logger"
 	"database/sql/driver"
 	"fmt"
 	"github.com/jinzhu/gorm"

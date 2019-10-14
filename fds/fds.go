@@ -1,7 +1,7 @@
 package fds
 
 import (
-	"go-utils/conf"
+	"github.com/qkzsky/go-utils/conf"
 	"fmt"
 	"github.com/XiaoMi/galaxy-fds-sdk-golang"
 	"github.com/XiaoMi/galaxy-fds-sdk-golang/Model"

@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"go-utils/conf"
+	"github.com/qkzsky/go-utils/conf"
 	"gopkg.in/ini.v1"
 	"sync"
 	"time"
