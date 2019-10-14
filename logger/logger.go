@@ -1,10 +1,10 @@
 package logger
 
 import (
-	"github.com/qkzsky/go-utils/conf"
 	"flag"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/qkzsky/go-utils/conf"
 	"os"
 	"sync"
 	"time"

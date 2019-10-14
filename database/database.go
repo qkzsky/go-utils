@@ -1,13 +1,13 @@
 package database
 
 import (
-	"github.com/qkzsky/go-utils/conf"
-	"github.com/qkzsky/go-utils/logger"
 	"database/sql/driver"
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"github.com/qkzsky/go-utils/conf"
+	"github.com/qkzsky/go-utils/logger"
 	"go.uber.org/zap"
 	"gopkg.in/ini.v1"
 	"micode.be.xiaomi.com/systech/asset/xmcrypt"

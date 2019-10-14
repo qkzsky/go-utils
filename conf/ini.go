@@ -1,8 +1,8 @@
 package conf
 
 import (
-	"go-utils"
 	"github.com/gin-gonic/gin"
+	"github.com/qkzsky/go-utils"
 	"gopkg.in/ini.v1"
 	"os"
 	"path/filepath"
