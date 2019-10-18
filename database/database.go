@@ -84,7 +84,7 @@ func NewDB(databaseName string) *gorm.DB {
 	db.DB().SetMaxOpenConns(maxOpen)
 	db.DB().SetMaxIdleConns(maxIdle)
 
-	gormConf := conf.AppConf.Section("gorm")
+	gormConf := config.AppConf.Section("gorm")
 
 	logModeCfg := gormConf.Key("log.mode")
 	if logModeCfg.String() != "" {

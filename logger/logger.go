@@ -21,7 +21,7 @@ var (
 	AppLogger *zap.Logger
 )
 
-func in() {
+func init() {
 	var err error
 	logPath = config.AppConf.Section("log").Key("path").String()
 
