@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"github.com/qkzsky/go-utils/conf"
+	"github.com/qkzsky/go-utils/config"
 	"gopkg.in/ini.v1"
 	"sync"
 	"time"
@@ -25,7 +25,7 @@ var (
 )
 
 func init() {
-	redisConf = conf.AppConf.Section("redis")
+	redisConf = config.AppConf.Section("redis")
 }
 
 func NewRedis(redisName string) *redis.Pool {

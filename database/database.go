@@ -6,7 +6,7 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/qkzsky/go-utils/conf"
+	"github.com/qkzsky/go-utils/config"
 	"github.com/qkzsky/go-utils/logger"
 	"go.uber.org/zap"
 	"gopkg.in/ini.v1"
@@ -31,7 +31,7 @@ var (
 )
 
 func init() {
-	dbConf = conf.AppConf.Section("database")
+	dbConf = config.AppConf.Section("database")
 }
 
 func NewDB(databaseName string) *gorm.DB {

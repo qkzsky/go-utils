@@ -1,4 +1,4 @@
-package conf
+package config
 
 import (
 	"fmt"
@@ -29,26 +29,26 @@ func init() {
 }
 
 func NewConfig(filename string) *ini.File {
-	var confPath string
-	confPath = filepath.Join(AppPath, "conf", filename)
-	if !utils.FileExists(confPath) {
+	var configPath string
+	configPath = filepath.Join(AppPath, "config", filename)
+	if !utils.FileExists(configPath) {
 		tempPath, err := os.Getwd()
 		if err != nil {
 			panic(err)
 		}
 
-		confPath = filepath.Join(tempPath, "conf", filename)
-		for !utils.FileExists(confPath) {
+		configPath = filepath.Join(tempPath, "config", filename)
+		for !utils.FileExists(configPath) {
 			if tempPath == "" {
 				log.Println(fmt.Sprintf("config file %s not existed!", filename))
 				return nil
 			}
 			tempPath = utils.ParentDirectory(tempPath)
-			confPath = filepath.Join(tempPath, "conf", filename)
+			configPath = filepath.Join(tempPath, "config", filename)
 		}
 	}
 
-	cfg, err := ini.Load(confPath)
+	cfg, err := ini.Load(configPath)
 	if err != nil {
 		panic(err)
 	}

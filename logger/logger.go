@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/qkzsky/go-utils/conf"
+	"github.com/qkzsky/go-utils/config"
 	"os"
 	"sync"
 	"time"
@@ -21,9 +21,9 @@ var (
 	AppLogger *zap.Logger
 )
 
-func init() {
+func in() {
 	var err error
-	logPath = conf.AppConf.Section("log").Key("path").String()
+	logPath = config.AppConf.Section("log").Key("path").String()
 
 	if err = os.Mkdir(logPath, os.ModePerm); err != nil {
 		if !os.IsExist(err) {
