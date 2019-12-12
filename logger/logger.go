@@ -81,8 +81,8 @@ func NewLogger(logName string) *zap.Logger {
 
 	var core zapcore.Core
 	encoder := zap.NewProductionEncoderConfig()
-	encoder.EncodeTime = TimeEncoder
-	//encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	//encoder.EncodeTime = TimeEncoder
+	encoder.EncodeTime = zapcore.ISO8601TimeEncoder
 
 	if gin.IsDebugging() {
 		logLevel = zap.NewAtomicLevelAt(zap.DebugLevel)
