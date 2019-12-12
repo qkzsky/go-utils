@@ -31,7 +31,7 @@ var (
 )
 
 func init() {
-	dbConf = config.AppConf.Section("database")
+	dbConf = config.Section("database")
 }
 
 func NewDB(databaseName string) *gorm.DB {
@@ -84,7 +84,7 @@ func NewDB(databaseName string) *gorm.DB {
 	db.DB().SetMaxOpenConns(maxOpen)
 	db.DB().SetMaxIdleConns(maxIdle)
 
-	gormConf := config.AppConf.Section("gorm")
+	gormConf := config.Section("gorm")
 
 	logModeCfg := gormConf.Key("log.mode")
 	if logModeCfg.String() != "" {
@@ -102,7 +102,7 @@ func NewDB(databaseName string) *gorm.DB {
 	//	panic(err)
 	//}
 	//db.SetLogger(gLogger{log.New(logFile, "", 0)})
-	db.SetLogger(gLogger{logger.NewLogger("gorm")})
+	db.SetLogger(gLogger{logger.NewLogger(config.AppName + "-gorm")})
 
 	dbMap.Store(databaseName, db)
 
@@ -123,7 +123,7 @@ type gLogger struct {
 }
 
 // Print format & print log
-func (logger gLogger) Print(values ...interface{}) {
+func (l gLogger) Print(values ...interface{}) {
 	if len(values) <= 1 {
 		return
 	}
@@ -199,12 +199,12 @@ func (logger gLogger) Print(values ...interface{}) {
 
 	switch level {
 	case "sql":
-		logger.Debug("[gorm] sql", messages...)
+		l.Debug("[gorm] sql", messages...)
 	case "log":
-		logger.Info("[gorm] log", messages...)
+		l.Info("[gorm] log", messages...)
 	case "error":
-		logger.Error("[gorm] error", messages...)
+		l.Error("[gorm] error", messages...)
 	default:
-		logger.Error("[gorm] error", messages...)
+		l.Error("[gorm] error", messages...)
 	}
 }

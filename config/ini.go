@@ -14,8 +14,9 @@ const AppConfFile = "app.ini"
 
 var (
 	AppPath string
+	AppName string
 
-	AppConf *ini.File
+	defaultConf *ini.File
 )
 
 func init() {
@@ -24,8 +25,10 @@ func init() {
 		panic(err)
 	}
 
-	AppConf = NewConfig(AppConfFile)
-	gin.SetMode(AppConf.Section("").Key("mode").String())
+	defaultConf = NewConfig(AppConfFile)
+	gin.SetMode(Section("").Key("mode").String())
+
+	AppName = Section("").Key("appname").MustString("app")
 }
 
 func NewConfig(filename string) *ini.File {
@@ -53,4 +56,8 @@ func NewConfig(filename string) *ini.File {
 		panic(err)
 	}
 	return cfg
+}
+
+func Section(name string) *ini.Section {
+	return defaultConf.Section(name)
 }

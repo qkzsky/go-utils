@@ -25,7 +25,7 @@ var (
 )
 
 func init() {
-	redisConf = config.AppConf.Section("redis")
+	redisConf = config.Section("redis")
 }
 
 func NewRedis(redisName string) *redis.Pool {

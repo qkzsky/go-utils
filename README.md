@@ -2,6 +2,8 @@
 
 ## app.ini 示例
 ```ini
+appname = app
+
 ;debug、test、release
 mode = debug
 host =

@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"flag"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/qkzsky/go-utils/config"
@@ -11,6 +10,7 @@ import (
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 var (
@@ -18,12 +18,29 @@ var (
 	loggerMap sync.Map
 	mu        sync.Mutex
 
-	AppLogger *zap.Logger
+	defaultLogger *zap.Logger
 )
+
+var levelMap = map[string]zapcore.Level{
+	"debug":  zapcore.DebugLevel,
+	"info":   zapcore.InfoLevel,
+	"warn":   zapcore.WarnLevel,
+	"error":  zapcore.ErrorLevel,
+	"dpanic": zapcore.DPanicLevel,
+	"panic":  zapcore.PanicLevel,
+	"fatal":  zapcore.FatalLevel,
+}
+
+func getLoggerLevel(lvl string) zapcore.Level {
+	if level, ok := levelMap[lvl]; ok {
+		return level
+	}
+	return zapcore.InfoLevel
+}
 
 func init() {
 	var err error
-	logPath = config.AppConf.Section("log").Key("path").String()
+	logPath = config.Section("log").Key("path").String()
 
 	if err = os.Mkdir(logPath, os.ModePerm); err != nil {
 		if !os.IsExist(err) {
@@ -31,7 +48,7 @@ func init() {
 		}
 	}
 
-	AppLogger = NewLogger("app")
+	defaultLogger = NewLogger(config.AppName)
 }
 
 func GetPath() string {
@@ -53,46 +70,73 @@ func NewLogger(logName string) *zap.Logger {
 		return logger.(*zap.Logger)
 	}
 
+	fileName := fmt.Sprintf("%s/%s.log", logPath, logName)
 	var logLevel zap.AtomicLevel
-	outputPaths := []string{fmt.Sprintf("%s/%s.log", logPath, logName)}
+	fileWriters := []zapcore.WriteSyncer{zapcore.AddSync(&lumberjack.Logger{
+		Filename:  fileName,
+		MaxSize:   1 << 10, // MB
+		LocalTime: true,
+		Compress:  true,
+	})}
 
-	var encoderConfig zapcore.EncoderConfig
-	var encoding string
+	var core zapcore.Core
+	encoder := zap.NewProductionEncoderConfig()
+	encoder.EncodeTime = TimeEncoder
+	//encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+
 	if gin.IsDebugging() {
 		logLevel = zap.NewAtomicLevelAt(zap.DebugLevel)
-		encoding = "console"
-		if flag.Lookup("test.v") == nil {
-			outputPaths = append(outputPaths, "stdout")
-		}
+		//if flag.Lookup("test.v") == nil {
+		//	outputPaths = append(outputPaths, "stdout")
+		//}
 
-		encoderConfig = zap.NewDevelopmentEncoderConfig()
-		encoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+		// debug 日志输出至日志文件、标准输出
+		core = zapcore.NewTee(
+			zapcore.NewCore(zapcore.NewJSONEncoder(encoder), zap.CombineWriteSyncers(fileWriters...), logLevel),
+			func() zapcore.Core {
+				consoleWriter, closeOut, err := zap.Open("stdout")
+				if err != nil {
+					closeOut()
+					panic(err)
+				}
+				encoder.EncodeLevel = zapcore.CapitalColorLevelEncoder
+				return zapcore.NewCore(zapcore.NewConsoleEncoder(encoder), zap.CombineWriteSyncers(consoleWriter), logLevel)
+			}(),
+		)
 	} else {
 		logLevel = zap.NewAtomicLevelAt(zap.InfoLevel)
-		encoding = "json"
-
-		encoderConfig = zap.NewProductionEncoderConfig()
-	}
-	encoderConfig.EncodeTime = TimeEncoder
-
-	CustomConfig := zap.Config{
-		Level:             logLevel,
-		Development:       gin.IsDebugging(),
-		DisableStacktrace: !gin.IsDebugging(),
-		Encoding:          encoding,
-		EncoderConfig:     encoderConfig,
-		OutputPaths:       outputPaths,
-		ErrorOutputPaths:  []string{"stderr"},
+		core = zapcore.NewCore(zapcore.NewJSONEncoder(encoder), zap.CombineWriteSyncers(fileWriters...), logLevel)
 	}
 
-	logger, err := CustomConfig.Build()
-	if err != nil {
-		panic(err)
-	}
-	if err := logger.Sync(); err != nil {
-		//panic(err)
-	}
-
+	logger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
 	loggerMap.Store(logName, logger)
 	return logger
+}
+
+func Debug(msg string, fields ...zap.Field) {
+	defaultLogger.Debug(msg, fields...)
+}
+
+func Info(msg string, fields ...zap.Field) {
+	defaultLogger.Info(msg, fields...)
+}
+
+func Warn(msg string, fields ...zap.Field) {
+	defaultLogger.Warn(msg, fields...)
+}
+
+func Error(msg string, fields ...zap.Field) {
+	defaultLogger.Error(msg, fields...)
+}
+
+func DPanic(msg string, fields ...zap.Field) {
+	defaultLogger.DPanic(msg, fields...)
+}
+
+func Panic(msg string, fields ...zap.Field) {
+	defaultLogger.Panic(msg, fields...)
+}
+
+func Fatal(msg string, fields ...zap.Field) {
+	defaultLogger.Fatal(msg, fields...)
 }
