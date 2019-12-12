@@ -12,6 +12,7 @@ import (
 	"gopkg.in/ini.v1"
 	"reflect"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -21,8 +22,9 @@ import (
 
 const DefaultCharset = "utf8"
 const DefaultSSLMode = "disable"
-const DefaultMysqlMaxIdle = 10
-const DefaultMysqlMaxOpen = 20
+
+var defaultMysqlMaxIdle = runtime.NumCPU() + 1
+var defaultMysqlMaxOpen = runtime.NumCPU()*2 + 1
 
 var (
 	dbConf *ini.Section
@@ -54,8 +56,8 @@ func NewDB(databaseName string) *gorm.DB {
 	dbName := dbConf.Key(databaseName + ".db").String()
 	sslMode := dbConf.Key(databaseName + ".sslmode").MustString(DefaultSSLMode)
 	charset := dbConf.Key(databaseName + ".charset").MustString(DefaultCharset)
-	maxOpen := dbConf.Key(databaseName + ".max_open").MustInt(DefaultMysqlMaxOpen)
-	maxIdle := dbConf.Key(databaseName + ".max_idle").MustInt(DefaultMysqlMaxIdle)
+	maxOpen := dbConf.Key(databaseName + ".max_open").MustInt(defaultMysqlMaxOpen)
+	maxIdle := dbConf.Key(databaseName + ".max_idle").MustInt(defaultMysqlMaxIdle)
 
 	var dsn string
 	switch drive {

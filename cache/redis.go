@@ -3,6 +3,7 @@ package cache
 import (
 	"github.com/qkzsky/go-utils/config"
 	"gopkg.in/ini.v1"
+	"runtime"
 	"sync"
 	"time"
 
@@ -13,9 +14,11 @@ const (
 	DefaultConnectTimeout = 100 * time.Millisecond
 	DefaultReadTimeout    = 1000 * time.Millisecond
 	DefaultWriteTimeout   = 1000 * time.Millisecond
+)
 
-	DefaultRedisMaxIdle = 10
-	DefaultRedisMaxOpen = 20
+var (
+	defaultRedisMaxIdle = runtime.NumCPU() + 1
+	defaultRedisMaxOpen = runtime.NumCPU()*2 + 1
 )
 
 var (
@@ -48,7 +51,7 @@ func NewRedis(redisName string) *redis.Pool {
 		panic("redis config " + redisName + " not found")
 	}
 
-	maxOpen := DefaultRedisMaxOpen
+	maxOpen := defaultRedisMaxOpen
 	if redisConf.HasKey(redisName + ".max_open") {
 		maxOpen, err = redisConf.Key(redisName + ".max_open").Int()
 		if err != nil {
@@ -56,7 +59,7 @@ func NewRedis(redisName string) *redis.Pool {
 		}
 	}
 
-	maxIdle := DefaultRedisMaxIdle
+	maxIdle := defaultRedisMaxIdle
 	if redisConf.HasKey(redisName + ".max_idle") {
 		maxIdle, err = redisConf.Key(redisName + ".max_idle").Int()
 		if err != nil {
