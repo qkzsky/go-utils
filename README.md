@@ -2,7 +2,8 @@
 
 ## app.ini 示例
 ```ini
-appname = app
+[app]
+name = app
 
 ;debug、test、release
 mode = debug
@@ -11,6 +12,9 @@ port = 8080
 
 [log]
 path = {$LOG_DIR}/logs
+maxsize = 1024
+; 压缩备份？
+compress = true
 
 [gorm]
 ; true 打开，false 关闭，""只记录错误日志

@@ -26,9 +26,9 @@ func init() {
 	}
 
 	defaultConf = NewConfig(AppConfFile)
-	gin.SetMode(Section("").Key("mode").String())
+	gin.SetMode(Key("mode").String())
 
-	AppName = Section("").Key("appname").MustString("app")
+	AppName = Key("name").MustString("app")
 }
 
 func NewConfig(filename string) *ini.File {
@@ -60,4 +60,8 @@ func NewConfig(filename string) *ini.File {
 
 func Section(name string) *ini.Section {
 	return defaultConf.Section(name)
+}
+
+func Key(name string) *ini.Key {
+	return Section("app").Key(name)
 }

@@ -18,7 +18,10 @@ var (
 	loggerMap sync.Map
 	mu        sync.Mutex
 
-	defaultLogger *zap.Logger
+	section = config.Section("log")
+
+	defaultLogger  *zap.Logger
+	defaultMaxSize = 1 << 10 // 1GB
 )
 
 var levelMap = map[string]zapcore.Level{
@@ -40,7 +43,7 @@ func getLoggerLevel(lvl string) zapcore.Level {
 
 func init() {
 	var err error
-	logPath = config.Section("log").Key("path").String()
+	logPath = section.Key("path").String()
 
 	if err = os.Mkdir(logPath, os.ModePerm); err != nil {
 		if !os.IsExist(err) {
@@ -72,11 +75,12 @@ func NewLogger(logName string) *zap.Logger {
 
 	fileName := fmt.Sprintf("%s/%s.log", logPath, logName)
 	var logLevel zap.AtomicLevel
+
 	fileWriters := []zapcore.WriteSyncer{zapcore.AddSync(&lumberjack.Logger{
 		Filename:  fileName,
-		MaxSize:   1 << 10, // MB
+		MaxSize:   section.Key("maxsize").MustInt(defaultMaxSize), // MB
 		LocalTime: true,
-		Compress:  true,
+		Compress:  section.Key("compress").MustBool(true),
 	})}
 
 	var core zapcore.Core
