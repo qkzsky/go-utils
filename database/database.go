@@ -13,7 +13,6 @@ import (
 	"reflect"
 	"regexp"
 	"runtime"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -133,6 +132,7 @@ func (l gLogger) Print(values ...interface{}) {
 	var messages []zap.Field
 	var (
 		sql             string
+		msg             string
 		formattedValues []string
 		level           = values[0].(string)
 		source          = fmt.Sprintf("%v", values[1])
@@ -140,7 +140,7 @@ func (l gLogger) Print(values ...interface{}) {
 
 	if level == "sql" {
 		// duration
-		messages = append(messages, zap.Duration("elapsed", values[2].(time.Duration)))
+		messages = append(messages, zap.String("elapsed", values[2].(time.Duration).String()))
 
 		// sql
 		for _, value := range values[4].([]interface{}) {
@@ -148,7 +148,11 @@ func (l gLogger) Print(values ...interface{}) {
 			if indirectValue.IsValid() {
 				value = indirectValue.Interface()
 				if t, ok := value.(time.Time); ok {
-					formattedValues = append(formattedValues, fmt.Sprintf("'%v'", t.Format("2006-01-02 15:04:05")))
+					if t.IsZero() {
+						formattedValues = append(formattedValues, fmt.Sprintf("'%v'", "0000-00-00 00:00:00"))
+					} else {
+						formattedValues = append(formattedValues, fmt.Sprintf("'%v'", t.Format("2006-01-02 15:04:05")))
+					}
 				} else if b, ok := value.([]byte); ok {
 					if str := string(b); isPrintable(str) {
 						formattedValues = append(formattedValues, fmt.Sprintf("'%v'", str))
@@ -162,7 +166,12 @@ func (l gLogger) Print(values ...interface{}) {
 						formattedValues = append(formattedValues, "NULL")
 					}
 				} else {
-					formattedValues = append(formattedValues, fmt.Sprintf("'%v'", value))
+					switch value.(type) {
+					case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, bool:
+						formattedValues = append(formattedValues, fmt.Sprintf("%v", value))
+					default:
+						formattedValues = append(formattedValues, fmt.Sprintf("'%v'", value))
+					}
 				}
 			} else {
 				formattedValues = append(formattedValues, "NULL")
@@ -186,14 +195,14 @@ func (l gLogger) Print(values ...interface{}) {
 			}
 		}
 
-		messages = append(messages, zap.String("sql", sql))
-		messages = append(messages, zap.String("rows affected or returned", strconv.FormatInt(values[5].(int64), 10)))
+		//messages = append(messages, zap.String("sql", sql))
+		messages = append(messages, zap.Int64("rows affected or returned", values[5].(int64)))
 	} else {
 		if strings.HasPrefix(level, "/") {
 			source = values[0].(string)
-			messages = append(messages, zap.String("message", fmt.Sprintf("%v", values[1:])))
+			msg = fmt.Sprintf("%v", values[1:])
 		} else {
-			messages = append(messages, zap.String("message", fmt.Sprintf("%v", values[2:])))
+			msg = fmt.Sprintf("%v", values[2:])
 		}
 	}
 
@@ -201,12 +210,8 @@ func (l gLogger) Print(values ...interface{}) {
 
 	switch level {
 	case "sql":
-		l.Debug("[gorm] sql", messages...)
-	case "log":
-		l.Info("[gorm] log", messages...)
-	case "error":
-		l.Error("[gorm] error", messages...)
+		l.Debug(fmt.Sprintf("[gorm] %s: %s", level, sql), messages...)
 	default:
-		l.Error("[gorm] error", messages...)
+		l.Error(fmt.Sprintf("[gorm] %s: %s", level, msg), messages...)
 	}
 }
