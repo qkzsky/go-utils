@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/qkzsky/go-utils"
 	"gopkg.in/ini.v1"
 	"log"
@@ -26,6 +27,8 @@ func init() {
 
 	defaultConf = NewConfig(AppConfFile)
 	AppName = Key("name").MustString("app")
+
+	gin.SetMode(Key("mode").String())
 }
 
 func NewConfig(filename string) *ini.File {
