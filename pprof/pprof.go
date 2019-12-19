@@ -1,10 +1,9 @@
 package pprof
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 	"net/http/pprof"
-	"os"
 )
 
 const (
@@ -25,15 +24,15 @@ func Listen(addr string, prefixOptions ...string) {
 
 	mux := http.NewServeMux()
 	mux.Handle(prefix+"/", http.HandlerFunc(pprof.Index))
-	mux.Handle(prefix+"/allocs", http.HandlerFunc(pprof.Handler("allocs").ServeHTTP))
-	mux.Handle(prefix+"/block", http.HandlerFunc(pprof.Handler("block").ServeHTTP))
+	mux.Handle(prefix+"/allocs", pprof.Handler("allocs"))
+	mux.Handle(prefix+"/block", pprof.Handler("block"))
 	mux.Handle(prefix+"/cmdline", http.HandlerFunc(pprof.Cmdline))
-	mux.Handle(prefix+"/goroutine", http.HandlerFunc(pprof.Handler("goroutine").ServeHTTP))
-	mux.Handle(prefix+"/heap", http.HandlerFunc(pprof.Handler("heap").ServeHTTP))
-	mux.Handle(prefix+"/mutex", http.HandlerFunc(pprof.Handler("mutex").ServeHTTP))
+	mux.Handle(prefix+"/goroutine", pprof.Handler("goroutine"))
+	mux.Handle(prefix+"/heap", pprof.Handler("heap"))
+	mux.Handle(prefix+"/mutex", pprof.Handler("mutex"))
 	mux.Handle(prefix+"/profile", http.HandlerFunc(pprof.Profile))
 	mux.Handle(prefix+"/symbol", http.HandlerFunc(pprof.Symbol))
-	mux.Handle(prefix+"/threadcreate", http.HandlerFunc(pprof.Handler("threadcreate").ServeHTTP))
+	mux.Handle(prefix+"/threadcreate", pprof.Handler("threadcreate"))
 	mux.Handle(prefix+"/trace", http.HandlerFunc(pprof.Trace))
 
 	srv := http.Server{
@@ -44,7 +43,7 @@ func Listen(addr string, prefixOptions ...string) {
 	go func() {
 		err := srv.ListenAndServe()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "pprof: %v", err)
+			log.Println("[pprof] " + err.Error())
 		}
 	}()
 }
