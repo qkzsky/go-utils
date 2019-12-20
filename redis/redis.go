@@ -79,7 +79,7 @@ func NewRedis(redisName string) *redis.Client {
 		MinIdleConns: idleSize,
 		IdleTimeout:  180 * time.Second,
 	})
-	if client.Ping().Err() != nil {
+	if err := client.Ping().Err(); err != nil {
 		log.Fatalln("[redis] " + err.Error())
 	}
 
